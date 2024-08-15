@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -27,10 +27,6 @@ import Link from "next/link";
 const drawerWidth = 240;
 
 interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * Remove this when copying and pasting into your project.
-   */
   window?: () => Window;
   children?: ReactNode;
 }
@@ -46,8 +42,10 @@ export default function Layout(props: Props) {
     setIsClosing(true);
     setMobileOpen(false);
   };
-  const handleCollapse = () => {
-    setIsCollapse(!isCollapse);
+
+  const handleCollapse = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setIsCollapse((prev) => !prev);
   };
 
   const handleDrawerTransitionEnd = () => {
@@ -59,11 +57,21 @@ export default function Layout(props: Props) {
       setMobileOpen(!mobileOpen);
     }
   };
-  // router
+
   const router = useRouter();
-  // pathname
   const pathname = usePathname();
   console.log("pathname " + pathname);
+
+  // Automatically expand "Setting" if on a sub-item route
+  useEffect(() => {
+    if (
+      pathname.startsWith("/support") ||
+      pathname.startsWith("/change-password") ||
+      pathname.startsWith("/contact")
+    ) {
+      setIsCollapse(true);
+    }
+  }, [pathname]);
 
   const drawer = (
     <div>
@@ -79,10 +87,9 @@ export default function Layout(props: Props) {
       </Toolbar>
       <Divider />
       <List>
-        {["Dashboard", "Profile", "Users", "Anaylytics"].map((text, index) => (
-          <Link href={`/${text.toLowerCase()}`}>
+        {["Dashboard", "Profile", "Users", "Analytics"].map((text, index) => (
+          <Link href={`/${text.toLowerCase()}`} key={text}>
             <ListItem
-              key={text}
               disablePadding
               className={
                 pathname.startsWith("/" + text.toLowerCase())
@@ -110,7 +117,7 @@ export default function Layout(props: Props) {
           disablePadding
           onClick={handleCollapse}
           className={
-            pathname.startsWith("/Setting")
+            pathname.startsWith("/setting")
               ? "text-sky-600 bg-slate-100"
               : " text-slate-700"
           }
@@ -118,7 +125,7 @@ export default function Layout(props: Props) {
           <ListItemButton>
             <ListItemIcon
               className={
-                pathname.startsWith("/Setting")
+                pathname.startsWith("/setting")
                   ? "text-sky-600 bg-slate-100"
                   : " text-slate-700"
               }
@@ -132,36 +139,36 @@ export default function Layout(props: Props) {
       </List>
       <Collapse in={isCollapse} timeout="auto" unmountOnExit>
         <List>
-          {["Support", "Change Password", "Contact"].map((text, index) => (
-            <ListItem
-              key={text}
-              disablePadding
-              className={
-                pathname.startsWith("/" + text.toLowerCase())
-                  ? "text-sky-600 bg-slate-100"
-                  : " text-slate-700"
-              }
-            >
-              <ListItemButton>
-                <ListItemIcon
-                  className={
-                    pathname.startsWith("/" + text.toLowerCase())
-                      ? "text-sky-600 bg-slate-100"
-                      : " text-slate-700"
-                  }
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
+          {["Support", "Change-Password", "Contact"].map((text, index) => (
+            <Link href={`/${text.toLowerCase()}`} key={text}>
+              <ListItem
+                disablePadding
+                className={
+                  pathname.startsWith("/" + text.toLowerCase())
+                    ? "text-sky-600 bg-slate-100"
+                    : " text-slate-700"
+                }
+              >
+                <ListItemButton>
+                  <ListItemIcon
+                    className={
+                      pathname.startsWith("/" + text.toLowerCase())
+                        ? "text-sky-600 bg-slate-100"
+                        : " text-slate-700"
+                    }
+                  >
+                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Collapse>
     </div>
   );
 
-  // Remove this const when copying and pasting into your project.
   const container =
     window !== undefined ? () => window().document.body : undefined;
 
@@ -199,7 +206,6 @@ export default function Layout(props: Props) {
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         aria-label="dashboard"
       >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
         <Drawer
           container={container}
           variant="temporary"
@@ -207,7 +213,7 @@ export default function Layout(props: Props) {
           onTransitionEnd={handleDrawerTransitionEnd}
           onClose={handleDrawerClose}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", sm: "none" },
