@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { ReactNode, useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -18,22 +17,25 @@ import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
 import { Collapse } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import { toast } from "react-toastify";
+
+// Adjusted type definition
+interface Props {
+  children?: ReactNode;
+  // window?: () => (Window & typeof globalThis);  // Adjust the type to be more specific
+}
+
 
 const drawerWidth = 240;
 
-interface Props {
-  window?: () => Window;
-  children?: ReactNode;
-}
-
 export default function Layout(props: Props) {
-  const { window } = props;
-  const { children } = props;
+  const {  children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
   const [isCollapse, setIsCollapse] = React.useState(false);
@@ -62,7 +64,6 @@ export default function Layout(props: Props) {
   const pathname = usePathname();
   console.log("pathname " + pathname);
 
-  // Automatically expand "Setting" if on a sub-item route
   useEffect(() => {
     if (
       pathname.startsWith("/support") ||
@@ -73,6 +74,19 @@ export default function Layout(props: Props) {
     }
   }, [pathname]);
 
+  const handleLogout = () => {
+    console.log("Logout clicked");
+
+    // Remove the token from localStorage
+    localStorage.removeItem("token");
+
+    // Optionally, show a logout successful message toast message
+    toast.success("Successfully logged out");
+
+    // Redirect to the login page
+    router.push("/login");
+  };
+
   const drawer = (
     <div>
       <Toolbar className="shadow-lg">
@@ -80,7 +94,7 @@ export default function Layout(props: Props) {
           variant="h6"
           noWrap
           component="div"
-          className=" font-semibold"
+          className="font-semibold"
         >
           APP-DASHBOARD
         </Typography>
@@ -94,7 +108,7 @@ export default function Layout(props: Props) {
               className={
                 pathname.startsWith("/" + text.toLowerCase())
                   ? "text-sky-600 bg-slate-100"
-                  : " text-slate-700"
+                  : "text-slate-700"
               }
             >
               <ListItemButton>
@@ -102,7 +116,7 @@ export default function Layout(props: Props) {
                   className={
                     pathname.startsWith("/" + text.toLowerCase())
                       ? "text-sky-600 bg-slate-100"
-                      : " text-slate-700"
+                      : "text-slate-700"
                   }
                 >
                   {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
@@ -119,7 +133,7 @@ export default function Layout(props: Props) {
           className={
             pathname.startsWith("/setting")
               ? "text-sky-600 bg-slate-100"
-              : " text-slate-700"
+              : "text-slate-700"
           }
         >
           <ListItemButton>
@@ -127,7 +141,7 @@ export default function Layout(props: Props) {
               className={
                 pathname.startsWith("/setting")
                   ? "text-sky-600 bg-slate-100"
-                  : " text-slate-700"
+                  : "text-slate-700"
               }
             >
               <MailIcon />
@@ -146,7 +160,7 @@ export default function Layout(props: Props) {
                 className={
                   pathname.startsWith("/" + text.toLowerCase())
                     ? "text-sky-600 bg-slate-100"
-                    : " text-slate-700"
+                    : "text-slate-700"
                 }
               >
                 <ListItemButton>
@@ -154,7 +168,7 @@ export default function Layout(props: Props) {
                     className={
                       pathname.startsWith("/" + text.toLowerCase())
                         ? "text-sky-600 bg-slate-100"
-                        : " text-slate-700"
+                        : "text-slate-700"
                     }
                   >
                     {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
@@ -169,8 +183,8 @@ export default function Layout(props: Props) {
     </div>
   );
 
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
+  const container =  undefined;
+
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -199,6 +213,14 @@ export default function Layout(props: Props) {
           <Typography variant="h6" noWrap component="div">
             {pathname.replace(/^\//, "").toUpperCase()}
           </Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <Button
+            color="inherit"
+            onClick={handleLogout}
+            sx={{ textTransform: "none" }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Box

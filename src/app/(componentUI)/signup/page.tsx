@@ -5,8 +5,10 @@ import React, { useState } from "react";
 import { registerUser } from "./action"; // Import the registerUser function
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for react-toastify
 import { toast } from "react-toastify";
+import useRedirectIfAuthenticated from "@/app/helper/useRedirect";
 
 export default function Signup() {
+  const isAuthenticated = useRedirectIfAuthenticated();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,6 +18,15 @@ export default function Signup() {
     email: "",
     password: "",
   });
+  if (isAuthenticated === null) {
+    // While checking for authentication status, you can show a loading indicator or nothing
+    return <div></div>;
+  }
+
+  if (isAuthenticated) {
+    // If authenticated, we already redirect in the hook, so we can return null or loading
+    return null;
+  }
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -104,7 +115,9 @@ export default function Signup() {
                   className="block w-full mt-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 {errors.username && (
-                  <span className="text-red-500 text-sm">{errors.username}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.username}
+                  </span>
                 )}
               </div>
               <div className="mb-4">
@@ -141,7 +154,9 @@ export default function Signup() {
                   </button>
                 </div>
                 {errors.password && (
-                  <span className="text-red-500 text-sm">{errors.password}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors.password}
+                  </span>
                 )}
               </div>
               <button

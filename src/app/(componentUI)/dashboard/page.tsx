@@ -2,9 +2,17 @@
 
 import { Typography } from "@mui/material";
 import Layout from "../sidenav/layout";
+import useAuth from "@/app/helper/useAuth";
 
 
 export default function UserHome() {
+  // Check if user is authenticated
+  const isAuthenticated = useAuth();
+
+  if (!isAuthenticated) {
+    return null; // Return null while checking authentication
+  }
+
   return (
     <div>
       <Layout>

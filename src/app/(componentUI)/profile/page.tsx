@@ -2,8 +2,13 @@
 import React from 'react'
 import Layout from '../sidenav/layout'
 import { Typography } from '@mui/material'
+import useAuth from "@/app/helper/useAuth";
 
 export default function Profile() {
+  const isAuthenticated = useAuth();
+  if (!isAuthenticated) {
+    return null;
+  }
   return (
     <>
         <Layout>
