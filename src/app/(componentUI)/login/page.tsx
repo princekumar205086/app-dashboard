@@ -9,88 +9,78 @@ import { useRouter } from "next/navigation";
 export default function Login() {
   const isAuthenticated = useRedirectIfAuthenticated();
   const router = useRouter();
-  const [loading, setLoading] = useState(false); // Loading state for form submission
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState(""); // To capture login-specific errors
 
+  // Show a loading indicator while checking authentication status
   if (isAuthenticated === null) {
-    // Display a loading indicator while checking authentication status
     return <div>Loading...</div>;
   }
 
+  // If already authenticated, return null to prevent the component from rendering
   if (isAuthenticated) {
-    // If authenticated, redirect is handled in the hook
     return null;
   }
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+  // Toggle password visibility
+  const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  };
-
-  const validatePassword = (password: string) => {
-    return password.length >= 8;
-  };
-
-  const handleEmailBlur = () => {
-    if (!validateEmail(email)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        email: "Invalid email address",
-      }));
-    } else {
-      setErrors((prevErrors) => ({ ...prevErrors, email: "" }));
+  // Validate input fields
+  const validateField = (name: string, value: string) => {
+    switch (name) {
+      case "email":
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+          ? ""
+          : "Invalid email address";
+      case "password":
+        return value.length >= 8
+          ? ""
+          : "Password must be at least 8 characters long";
+      default:
+        return "";
     }
   };
 
-  const handlePasswordBlur = () => {
-    if (!validatePassword(password)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        password: "Password must be at least 8 characters long",
-      }));
-    } else {
-      setErrors((prevErrors) => ({ ...prevErrors, password: "" }));
-    }
+  // Handle input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: validateField(name, value),
+    }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let valid = true;
 
-    if (!validateEmail(email)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        email: "Invalid email address",
-      }));
-      valid = false;
+    const emailError = validateField("email", formData.email);
+    const passwordError = validateField("password", formData.password);
+
+    if (emailError || passwordError) {
+      setErrors({ email: emailError, password: passwordError });
+      return;
     }
 
-    if (!validatePassword(password)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        password: "Password must be at least 8 characters long",
-      }));
-      valid = false;
-    }
-
-    if (valid) {
-      setLoading(true); // Start loading
-      try {
-        await login(email, password);
+    setLoading(true);
+    setLoginError(""); // Clear any previous login errors
+    try {
+      await login(formData.email, formData.password);
+      const role = localStorage.getItem("role");
+      if (role === "ADMIN") {
+        router.push("/admin");
+      } else {
         router.push("/dashboard");
-      } catch (error) {
-        // Handle login errors here (e.g., display error message)
-        console.error(error);
-      } finally {
-        setLoading(false); // Stop loading
       }
+    } catch (error) {
+      setLoginError("Invalid email or password. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -125,9 +115,8 @@ export default function Login() {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={handleEmailBlur}
+                  value={formData.email}
+                  onChange={handleChange}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -157,9 +146,8 @@ export default function Login() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onBlur={handlePasswordBlur}
+                  value={formData.password}
+                  onChange={handleChange}
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 <button
@@ -172,6 +160,8 @@ export default function Login() {
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
             </div>
+
+            {loginError && <p className="text-red-500 text-xs mt-4">{loginError}</p>}
 
             <div className="flex items-center">
               <input
@@ -191,7 +181,7 @@ export default function Login() {
             <div>
               <button
                 type="submit"
-                disabled={loading} // Disable button while loading
+                disabled={loading}
                 className={`flex w-full justify-center rounded-md px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
                   loading ? "bg-gray-400" : "bg-indigo-600 hover:bg-indigo-500"
                 }`}

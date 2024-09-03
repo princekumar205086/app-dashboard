@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import bcryptjs from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+// Use a single Prisma client instance to avoid multiple connections
+const prisma = new PrismaClient();
+
+const JWT_SECRET = process.env.JWT_SECRET || 'myjwtsecretkey';
+
+// if (!JWT_SECRET) {
+//   throw new Error('JWT_SECRET is not defined in the environment variables.');
+// }
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +20,7 @@ export async function POST(request: NextRequest) {
     // Check if user exists
     const user = await prisma.user.findUnique({
       where: { email },
+      select: { id: true, username: true, email: true, password: true, role: true }, // Include role
     });
 
     if (!user) {
@@ -23,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Compare password
-    const isMatch = await bcryptjs.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return NextResponse.json(
         { error: "Invalid email or password" },
@@ -32,13 +40,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET!, { expiresIn: '1h' });
 
-    return NextResponse.json({
+    // Optionally set the token in an HTTP-only cookie for better security
+    const response = NextResponse.json({
       message: "Login successful",
-      token,
+      token, // You can remove this if using HTTP-only cookie
+      role: user.role,
     });
+
+    // Set token in HTTP-only cookie (secure, httpOnly, sameSite)
+    response.cookies.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600, // 1 hour in seconds
+    });
+
+    return response;
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Error during login:', error);
+    return NextResponse.json({ error: "An error occurred. Please try again later." }, { status: 500 });
   }
 }

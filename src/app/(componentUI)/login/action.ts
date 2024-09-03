@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-
 export const login = async (email: string, password: string) => {
   try {
     const response = await axios.post('/api/signin', { email, password });
@@ -9,6 +8,7 @@ export const login = async (email: string, password: string) => {
     if (response.data.token) {
       // Store the token in localStorage or any other storage
       localStorage.setItem('token', response.data.token);
+      localStorage.setItem('role', response.data.role); // Store the role
 
       // Display success toast
       toast.success('Login successful!');
