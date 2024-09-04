@@ -72,7 +72,7 @@ export default function Login() {
       await login(formData.email, formData.password);
       const role = localStorage.getItem("role");
       if (role === "ADMIN") {
-        router.push("/admin");
+        router.push("/admin/dashboard");
       } else {
         router.push("/dashboard");
       }

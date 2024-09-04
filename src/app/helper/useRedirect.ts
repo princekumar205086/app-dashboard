@@ -15,7 +15,7 @@ const useRedirectIfAuthenticated = () => {
       
       // Redirect based on role
       if (role === 'ADMIN') {
-        router.push('/admin');
+        router.push('/admin/dashboard');
       } else {
         router.push('/dashboard');
       }

@@ -3,9 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuth from "@/app/helper/useAuth";
-import Layout from '../sidenav/layout';
+import Layout from '../sidebar/page';
 
-export default function AdminPage() {
+export default function AdminDashboard() {
   const isAuthenticated = useAuth();
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
