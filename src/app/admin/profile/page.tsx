@@ -1,9 +1,12 @@
 import React from 'react'
+import Layouts from '../sidebar/page'
 
 export default function AdminProfile() {
   return (
     <>
-        <h1>Admin Profile</h1>
+        <Layouts>
+            <h1>Profile</h1>
+        </Layouts>
     </>
   )
 }

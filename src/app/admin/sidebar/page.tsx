@@ -26,16 +26,14 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 
 // Adjusted type definition
-interface Props {
-  children?: ReactNode;
-  // window?: () => (Window & typeof globalThis);  // Adjust the type to be more specific
-}
-
+// interface Props {
+//   children?: ReactNode;
+// }
 
 const drawerWidth = 240;
 
-export default function Layout(props: Props) {
-  const {  children } = props;
+export default function Layouts(props: any) {
+  const { children } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
   const [isCollapse, setIsCollapse] = React.useState(false);
@@ -101,31 +99,33 @@ export default function Layout(props: Props) {
       </Toolbar>
       <Divider />
       <List>
-        {["Dashboard", "Profile", "AstrologyService", "PujaService"].map((text, index) => (
-          <Link href={`/admin/${text.toLowerCase()}`} key={text}>
-            <ListItem
-              disablePadding
-              className={
-                pathname.startsWith("/" + text.toLowerCase())
-                  ? "text-sky-600 bg-slate-100"
-                  : "text-slate-700"
-              }
-            >
-              <ListItemButton>
-                <ListItemIcon
-                  className={
-                    pathname.startsWith("/" + text.toLowerCase())
-                      ? "text-sky-600 bg-slate-100"
-                      : "text-slate-700"
-                  }
-                >
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
-          </Link>
-        ))}
+        {["Dashboard", "Profile", "AstrologyService", "PujaService"].map(
+          (text, index) => (
+            <Link href={`/admin/${text.toLowerCase()}`} key={text}>
+              <ListItem
+                disablePadding
+                className={
+                  pathname.startsWith("/" + text.toLowerCase())
+                    ? "text-sky-600 bg-slate-100"
+                    : "text-slate-700"
+                }
+              >
+                <ListItemButton>
+                  <ListItemIcon
+                    className={
+                      pathname.startsWith("/" + text.toLowerCase())
+                        ? "text-sky-600 bg-slate-100"
+                        : "text-slate-700"
+                    }
+                  >
+                    {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItemButton>
+              </ListItem>
+            </Link>
+          )
+        )}
         <Divider />
         <ListItem
           disablePadding
@@ -183,8 +183,7 @@ export default function Layout(props: Props) {
     </div>
   );
 
-  const container =  undefined;
-
+  const container = undefined;
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -275,3 +274,4 @@ export default function Layout(props: Props) {
     </Box>
   );
 }
+

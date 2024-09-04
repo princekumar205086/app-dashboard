@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useAuth from "@/app/helper/useAuth";
-import Layout from '../sidebar/page';
+import Layouts from '../sidebar/page';
 
 export default function AdminDashboard() {
   const isAuthenticated = useAuth();
@@ -37,8 +37,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <Layout>
+    <Layouts>
       <h1>Admin Page only</h1>
-    </Layout>
+    </Layouts>
   );
 }
